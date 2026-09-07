@@ -1,4 +1,4 @@
-# Final Project Documentation (Le Shopping Site)
+# Documentation-Le Shopping Site
 
 A full-stack online shopping web application built with **Spring Boot** (backend) and **Vue.js** (two separate frontends: customer and administrator).
 
@@ -7,8 +7,8 @@ A full-stack online shopping web application built with **Spring Boot** (backend
 ## Project Structure
 
 ```
-FinalProject_backend/          Spring Boot backend (REST API + serves both frontends)
-FinalProject_frontend/
+online_shopping_backend/          Spring Boot backend (REST API + serves both frontends)
+online_shopping_frontend/
     ├── user/                  Customer-facing Vue app
     └── admin/                 Administrator Vue app
 ```
@@ -19,7 +19,7 @@ The two frontends are built and bundled into the backend's static resources, so 
 
 ## Requirements
 
-- **Java 17**
+- **Java 17** (subject to change)
 - **Maven** (or the bundled Maven wrapper / IDE Maven)
 - **Node.js** (only needed if rebuilding the frontends)
 - **MariaDB** access via the provided tunnel (schema: `test`)
@@ -108,7 +108,7 @@ After changing a frontend, rebuild and copy the output into the backend's static
 
 ```
 # build customer app
-cd FinalProject_frontend/user
+cd online_shopping_frontend/user
 npm run build
 
 # build admin app
@@ -117,8 +117,8 @@ npm run build
 ```
 
 Then copy the builds into the backend:
-- `user/dist/*`  → `FinalProject_backend/src/main/resources/static/`
-- `admin/dist/*` → `FinalProject_backend/src/main/resources/static/admin/`
+- `user/dist/*`  → `online_shopping_backend/src/main/resources/static/`
+- `admin/dist/*` → `online_shopping_backend/src/main/resources/static/admin/`
 
 Rebuild the backend so the updated static files are served.
 
