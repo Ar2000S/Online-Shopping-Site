@@ -1,0 +1,65 @@
+image: maven:3.9-eclipse-temurin-17
+
+stages:
+  - build
+  - test
+
+variables:
+  MAVEN_OPTS: "-Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository"
+
+cache:
+  paths:
+    - .m2/repository
+
+workflow:
+  rules:
+    - if: $CI_COMMIT_BRANCH =~ /^feature\/(topictest_java_basic|topictest_springboot|topictest_vue)\/.+/
+
+.extract-project:
+  before_script:
+    - BRANCH_KEY=$(echo "$CI_COMMIT_BRANCH" | sed 's|^feature/||' | cut -d'/' -f1)
+    - |
+      case "$BRANCH_KEY" in
+        topictest_java_basic) PROJECT="topictest_java_basic" ;;
+        topictest_springboot) PROJECT="topictest_springboot" ;;
+        topictest_vue)        PROJECT="topictest_vue_backend" ;;
+        *)                    echo "ERROR: Undefined branch key '$BRANCH_KEY'"; exit 1 ;;
+      esac
+    - echo "Branch key($BRANCH_KEY) -> Project($PROJECT)"
+    - if [ ! -d "$PROJECT" ]; then echo "ERROR Directory '$PROJECT' not found"; exit 1; fi
+
+build-job:
+  stage: build
+  extends: .extract-project
+  script:
+    - cd "$PROJECT" && mvn compile
+  artifacts:
+    paths:
+      - "*/target/"
+    expire_in: 1 hour
+
+test-job:
+  stage: test
+  extends: .extract-project
+  services:
+    - name: mariadb:10.11
+      alias: db
+  variables:
+    MYSQL_ROOT_PASSWORD: root
+    MYSQL_DATABASE: testdb
+    MYSQL_USER: testuser
+    MYSQL_PASSWORD: testpass
+    SPRING_DATASOURCE_URL: jdbc:mariadb://db:3306/testdb
+    SPRING_DATASOURCE_USERNAME: testuser
+    SPRING_DATASOURCE_PASSWORD: testpass
+    SPRING_PROFILES_ACTIVE: ci
+  script:
+    - cd "$PROJECT" && mvn test
+  artifacts:
+    when: always
+    reports:
+      junit:
+        - "*/target/surefire-reports/TEST-*.xml"
+    paths:
+      - "*/target/surefire-reports/"
+    expire_in: 1 week
